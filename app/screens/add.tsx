@@ -18,28 +18,18 @@ import {storeData, getData} from "../util/handleData";
 import catalogue from "./catalogue";
 const {width, height} = Dimensions.get("window");
 
-LogBox.ignoreLogs([
-  "VirtualizedLists should never be nested inside plain",
-  "expo-permissions is now deprecated"
-]);
+LogBox.ignoreLogs(["expo-permissions is now deprecated"]);
 
 const Add = (props: any) => {
   const [image, setImage] = useState<any>(null);
   const [addNewText, setAddNewText] = useState<any>(null);
 
-  const [albumVisible, setAlbumVisible] = useState<any>(true);
-
-  useEffect(() => {
-    // (async () => {
-    //   console.log(await getData());
-    // })();
-  }, []);
+  const [albumVisible, setAlbumVisible] = useState<any>(false);
 
   const AddNewCatalogue = async () => {
     if (addNewText) {
       let catnew = {...props.catalogue};
-
-      catnew[addNewText] = [];
+      catnew[addNewText] = null;
       storeData("catalogue", catnew);
       props.setCatalogue(catnew);
     }
@@ -51,6 +41,7 @@ const Add = (props: any) => {
       return;
     } else {
       const album = await MediaLibrary.getAlbumAsync(catalogue);
+
       const asset = await MediaLibrary.createAssetAsync(image);
       if (album === null) {
         const album_new = await MediaLibrary.createAlbumAsync(
@@ -58,7 +49,19 @@ const Add = (props: any) => {
           asset,
           false
         );
+
+        let catnew = {...props.catalogue};
+        //@ts-ignore
+        catnew[catalogue] = album_new.id;
+        storeData("catalogue", catnew);
+        props.setCatalogue(catnew);
       } else {
+        let catnew = {...props.catalogue};
+        //@ts-ignore
+        catnew[catalogue] = album.id;
+        storeData("catalogue", catnew);
+        props.setCatalogue(catnew);
+
         const asset_add = await MediaLibrary.addAssetsToAlbumAsync(
           [asset],
           album,
@@ -66,6 +69,8 @@ const Add = (props: any) => {
         );
       }
     }
+
+    setAlbumVisible(false);
   };
 
   const pickImage = async () => {
@@ -77,12 +82,31 @@ const Add = (props: any) => {
       quality: 1
     });
 
-    console.log(result);
-
     setAlbumVisible(true);
 
     if (!result.cancelled) {
       setImage(result.uri);
+    }
+  };
+
+  const captureImage = async () => {
+    const perm = await Permissions.askAsync(Permissions.CAMERA);
+    if (perm.status != "granted") {
+      return;
+    } else {
+      props.setVisible(false);
+
+      let result: any = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1
+      });
+
+      setAlbumVisible(true);
+
+      if (!result.cancelled) {
+        setImage(result.uri);
+      }
     }
   };
 
@@ -113,7 +137,7 @@ const Add = (props: any) => {
                 >
                   <TouchableNativeFeedback
                     useForeground={true}
-                    onPress={pickImage}
+                    onPress={captureImage}
                   >
                     <View
                       style={{

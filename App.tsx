@@ -2,6 +2,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
   SafeAreaView,
   TouchableNativeFeedback
 } from "react-native";
@@ -10,23 +11,37 @@ import React, {useEffect, useState} from "react";
 import Catalogue from "./app/screens/catalogue";
 import Add from "./app/screens/add";
 import Album from "./app/screens/album";
+import Favorites from "./app/screens/favorites";
 import {storeData, getData} from "./app/util/handleData";
 import {NavigationContainer} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
+//@ts-ignore
+import Logo from "./app/assets/logo.png";
 
 const HomeScreen = (props: any) => {
   const onPress = () => {};
   const [visible, setVisible] = useState<any>(false);
 
-  const [catalogue, setCatalogue] = useState<any>({portrait: [], abstract: []});
+  const [catalogue, setCatalogue] = useState<any>({
+    Portrait: null,
+    Abstract: null
+  });
 
   const getCatalogue = async () => {
     let catalogue = await getData("catalogue");
 
     if (!catalogue) {
-      storeData("catalogue", {portrait: [], abstract: []});
+      storeData("catalogue", {
+        Portrait: null,
+        Abstract: null
+      });
 
-      setCatalogue({portrait: [], abstract: []});
+      storeData("favorites", []);
+
+      setCatalogue({
+        Portrait: null,
+        Abstract: null
+      });
     } else {
       setCatalogue(catalogue);
     }
@@ -37,15 +52,22 @@ const HomeScreen = (props: any) => {
   }, []);
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: "#ccd8de"}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: "#ccd8de20"}}>
       <View style={{flex: 1, flexDirection: "column"}}>
         <View
           style={{
             height: 90,
             backgroundColor: "#449dc9",
-            flexDirection: "row"
+            flexDirection: "row",
+            paddingTop: 50,
+            paddingLeft: 10
           }}
-        ></View>
+        >
+          <Image
+            source={Logo}
+            style={{width: 130, height: 40, resizeMode: "contain"}}
+          />
+        </View>
         <Catalogue catalogue={catalogue} navigation={props.navigation} />
         <Add
           visible={visible}
@@ -115,6 +137,13 @@ const App = () => {
         <Stack.Screen
           name="Album"
           component={Album}
+          options={() => ({
+            headerShown: false
+          })}
+        />
+        <Stack.Screen
+          name="Favorites"
+          component={Favorites}
           options={() => ({
             headerShown: false
           })}

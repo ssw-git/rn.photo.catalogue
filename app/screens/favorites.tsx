@@ -30,33 +30,10 @@ const Album = (props: any) => {
 
   useEffect(() => {
     (async () => {
-      const perm = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
-      if (perm.status != "granted") {
-        return;
-      } else {
-        if (props.route.params.id != null) {
-          let assets1 = await MediaLibrary.getAssetsAsync({
-            album: props.route.params.id,
-            mediaType: "photo"
-          });
-
-          setAssets(assets1);
-        }
-      }
-
       let favorites = await getData("favorites");
       setFavorites(favorites);
     })();
   }, []);
-
-  const AddToFavorites = async (uri: string) => {
-    let fav1 = [...favorites];
-    //@ts-ignore
-    fav1.push(uri);
-    storeData("favorites", fav1);
-
-    setFavorites(fav1);
-  };
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: "#ccd8de"}}>
@@ -78,7 +55,7 @@ const Album = (props: any) => {
               marginLeft: 20
             }}
           >
-            {props.route.params.catalogue}
+            Favorites
           </Text>
         </View>
         <View
@@ -100,8 +77,8 @@ const Album = (props: any) => {
                 paddingTop: 5
               }}
             >
-              {assets != null &&
-                assets.assets.map((item: any, index: any) => {
+              {favorites != null &&
+                favorites.map((item: any, index: any) => {
                   return (
                     <View
                       key={index}
@@ -119,39 +96,7 @@ const Album = (props: any) => {
                       <TouchableNativeFeedback
                         useForeground={true}
                         onPress={() => {
-                          AddToFavorites(item.uri);
-                        }}
-                      >
-                        <View
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            top: 0,
-                            width: 35,
-                            height: 35,
-                            // backgroundColor: "red",
-                            zIndex: 100,
-                            alignItems: "center",
-                            justifyContent: "center"
-                          }}
-                        >
-                          <AntDesign
-                            name={
-                              //@ts-ignore
-                              favorites.includes(item.uri) ? "star" : "staro"
-                            }
-                            size={20}
-                            style={{
-                              color: "#cc631d"
-                            }}
-                          />
-                        </View>
-                      </TouchableNativeFeedback>
-
-                      <TouchableNativeFeedback
-                        useForeground={true}
-                        onPress={() => {
-                          setImgUrl(item.uri);
+                          setImgUrl(item);
                           setShowImage(true);
                         }}
                       >
@@ -165,7 +110,7 @@ const Album = (props: any) => {
                           }}
                         >
                           <Image
-                            source={{uri: item.uri}}
+                            source={{uri: item}}
                             style={{width: 200, height: 200}}
                           />
                         </View>
