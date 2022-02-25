@@ -26,7 +26,7 @@ Run App through Expo
 
 ## APK
 
-[Download Apk]()
+[Download Apk](https://drive.google.com/file/d/1ZO2b6_wZGsiaw88Dn-mYvgVp669UljtX/view?usp=sharing)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
